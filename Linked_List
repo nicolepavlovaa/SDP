@@ -1,0 +1,213 @@
+#include <iostream>
+using namespace std;
+
+template <typename T>
+struct Node 
+{
+	T data;
+	Node * next;
+public:
+	Node() :next(nullptr) {}
+};
+
+template <typename T>
+class List {
+	Node<T> * start;
+	Node<T> * getNodeAt(int position);
+
+public:
+	List() :start(nullptr) {}
+	void deleteAt(int position);
+	void addAt(T element, int position);
+	T& getElementAt(int position);
+	void swapEl(int a, int b);
+	bool loop();
+	~List();
+};
+
+template<typename T>
+Node<T>* List<T>::getNodeAt(int position)
+{
+	Node<T> * current = start;
+	for (int i = 0; i < position; i++) 
+	{
+		current = current->next;
+	}
+	return current;
+}
+
+template<typename T>
+void List<T>::deleteAt(int position)
+{
+	if (position == 0) {
+		Node<T> * curr = start;
+		start = start->next;
+		delete curr;
+	}
+	else {
+		Node<T> * prev = getNodeAt(position - 1); //намираме предния елемент
+		Node<T> * curr = prev->next; //елемента за изтриване
+		prev->next = curr->next; //свързваме предния със следващия на този, който ще изтрием
+		delete curr;
+	}
+}
+
+template<typename T>
+void List<T>::addAt(T element, int position)
+{
+	if (position == 0) {
+		Node<T> * toAdd = new Node<T>();
+		toAdd->data = element;
+		toAdd->next = start; //слагаме новия елемент преди стартовия, т.е. следващ на новия е старият стартови
+		start = toAdd; //добавеният елемент става стартов
+	}
+	else {
+		Node<T> * previous = getNodeAt(position - 1);
+		Node<T> * toAdd = new Node<T>();
+		toAdd->data = element;
+		toAdd->next = previous->next; //свързваме новия елемент със следващия на елемента на позиция (position-1)
+		previous->next = toAdd; //свързваме предходния елемент с новия, т.е. вмъкваме между два елемента, с които го свързваме
+	}
+}
+
+template<typename T>
+T & List<T>::getElementAt(int position)
+{
+	return getNodeAt(position)->data;
+}
+
+template<typename T>
+void List<T>::swapEl(int a, int b)
+{
+	Node<T>* temp = new Node<T>();
+	Node<T>* previous1 = new Node<T>();
+	Node<T>* previous2 = new Node<T>();
+	Node<T>* A = new Node<T>();
+	Node<T>* B = new Node<T>();
+
+	if ((a - b == 1 || b - a == 1) && (a != 0 && b != 0)) //разликата е 1 и нито а, нито б са на нулева позиция
+	{
+		previous1 = getNodeAt(a - 1);
+		previous2 = getNodeAt(b - 1);
+		A = previous1->next;
+		B = previous2->next;
+		if (a < b)
+		{
+			previous1->next = B;
+			temp->next = B->next;
+			B->next = A;
+			A->next = temp->next;
+		}
+		else
+		{
+			previous2->next = A;
+			temp->next = A->next;
+			A->next = B;
+			B->next = temp->next;
+		}
+	}
+	else if ((a - b == 1 || b - a == 1) && (a == 0 || b == 0)) //разликата на а и б е 1, като а или б е на нулева позиция
+	{
+		if (a == 0)
+		{
+			previous2 = getNodeAt(b - 1);
+			A = getNodeAt(a);
+			B = previous2->next;
+		}
+		else
+		{
+			previous1 = getNodeAt(a - 1);
+			A = previous1->next;
+			B = getNodeAt(a);
+		}
+		start = B;
+		temp->next = B->next;
+		B->next = A;
+		A->next = temp->next;
+	}
+	else if ((a - b != 1 && b - a != 1) && (a == 0 || b == 0)) //разликата на а и б не е 1, а или б е на нулева позиция
+	{
+
+		if (a == 0)
+		{
+			previous2 = getNodeAt(b - 1);
+			A = getNodeAt(a);
+			B = previous2->next;
+
+			start = B;
+			temp->next = A->next;
+			previous2->next = A;
+			A->next = B->next;
+			B->next = temp->next;
+		}
+		else
+		{
+			previous1 = getNodeAt(a - 1);
+			A = previous1->next;
+			B = getNodeAt(b);
+
+			start = A;
+			temp->next = A->next;
+			previous1->next = B;
+			A->next = B->next;
+			B->next = temp->next;
+		}
+	}
+	else //разликата на а и б не е 1, нито а, нито б са на нулева позиция
+	{
+		previous1 = getNodeAt(a - 1);
+		previous2 = getNodeAt(b - 1);
+		A = previous1->next;
+		B = previous2->next;
+		temp->next = A->next; //запазваме next на А във временна променлива
+		previous2->next = A; //свързваме елемента пред В с А
+		A->next = B->next; //слагаме за следващ елемент на А следващия елемент на В
+		previous1->next = B; //свързваме елемента преди А с В
+		B->next = temp->next; //използваме временната променлива, където сме запазили следващия елемент на А, за да го сложим като следващ на В
+	}
+	delete temp;
+}
+
+template<typename T>
+bool List<T>::loop()
+{
+	Node<T>* ptr1 = start;
+	Node<T>* ptr2 = start;
+
+	while (ptr1 && ptr2 && ptr2->next)
+	{
+		ptr1 = ptr1->next;
+		ptr2 = ptr2->next->next;
+		if (ptr1 == ptr2) return true;
+	} 
+	return false;
+}
+
+template<typename T>
+List<T>::~List()
+{
+	while (start != nullptr) {
+		Node<T> * toDelete = start;
+		start = start->next;
+		delete toDelete;
+	}
+}
+
+int main() {
+	List<int> l;
+	l.addAt(21, 0);
+	l.addAt(42, 1);
+	l.addAt(55, 2);
+	l.addAt(66, 3);
+	l.addAt(77, 4);
+	l.addAt(88, 5);
+	l.addAt(99, 6);
+	cout << l.getElementAt(3) << endl;
+	cout << l.getElementAt(4) << endl;
+	l.swapEl(4, 3);
+	cout << l.getElementAt(3) << endl;
+	cout << l.getElementAt(4) << endl;
+	cout << l.loop() << endl;
+	system("pause");
+	return 0;
+}
