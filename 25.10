@@ -1,0 +1,27 @@
+list<int> reverse(list<int> l)
+{
+	list<int> result;
+	for (list<int>::reverse_iterator it= l.rbegin(); it != l.rend(); it++)
+	{
+		result.push_back(*it);
+	}
+	return result;
+}
+
+void printFibonacci(list<int> l)
+{
+	int f0 = 0;
+	int f1 = 1;
+	int i = 0;
+	for (list<int>::iterator it = l.begin(); it != l.end(); it++, i++)
+	{
+		if (i == 0 || i==1) { cout << *it << " "; }
+		if (i == f0+f1)  
+		{ 
+			f0 = f1;
+			f1 = i;
+			cout << *it << " "; 
+		}
+	}
+	cout << endl;
+}
