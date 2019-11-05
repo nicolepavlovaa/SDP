@@ -1,0 +1,100 @@
+#include <iostream>
+#include <cmath>
+using namespace std;
+
+struct Polynomial
+{
+	int coef[10];
+	int deg;
+	long double evaluate(long double x);
+};
+struct Expression
+{
+	pair<Polynomial, Polynomial> rec;
+	double lambda;
+	Expression();
+	long double calculate(long double lambda, double n);
+	void findLimit();
+	void findMembers();
+};
+
+long double Polynomial::evaluate(long double x)
+{
+	long double p = 0;
+	for (int i = 0; i <= deg; i++) 
+	{
+		p = coef[i] + (x * p);
+	}
+	return p;
+}
+Expression::Expression()
+{
+	rec.first.deg = 2;
+	rec.first.coef[0] = 2;
+	rec.first.coef[1] = -1;
+	rec.first.coef[2] = 6;
+	rec.second.deg = 1;
+	rec.second.coef[0] = 1;
+	rec.second.coef[1] = -6;
+}
+long double Expression::calculate(long double lambda,double n)
+{
+	long double res = lambda;
+	for (int i = 1; i < n; i++)
+	{
+		res = ((long double)rec.first.evaluate(res)) / rec.second.evaluate(res);
+	}
+	return res;
+}
+void Expression::findLimit()
+{
+	cout << "Enter lambda" << endl;
+	cin >> lambda;
+	Expression expr;
+
+	long double eps = 10e-5;
+	bool found = false;
+	int sign = 1;
+	long double first = lambda, second = lambda;
+	for (int i = 1; i < 10e5; i++)
+	{
+		first = second;
+		second = ((long double)expr.rec.first.evaluate(second)) / expr.rec.second.evaluate(second);
+		if (first > second) sign = -1;
+		if (abs(second - first) < eps)
+		{
+			found = true;
+			cout << second << endl;
+			break;
+		}
+	}
+	if (!found && sign == -1) cout << -INFINITY << endl;
+	else if (!found) cout << INFINITY << endl;
+
+}
+void Expression::findMembers()
+{
+	Expression expr;
+	int a, b, c, d, e;
+	cout << "Please enter 5 numbers..." << endl;
+	cin >> a >> b >> c >> d >> e;
+	cout << a << ": " << expr.calculate(lambda, a) << endl;
+	cout << b << ": " << expr.calculate(lambda, b) << endl;
+	cout << c << ": " << expr.calculate(lambda, c) << endl;
+	cout << d << ": " << expr.calculate(lambda, d) << endl;
+	cout << e << ": " << expr.calculate(lambda, e) << endl;
+}
+void run()
+{
+	Expression ex;
+	ex.findLimit();
+	ex.findMembers();
+}
+
+
+int main()
+{
+	run();
+	system("pause");
+	return 0;
+}
