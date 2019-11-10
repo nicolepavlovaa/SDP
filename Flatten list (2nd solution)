@@ -1,0 +1,61 @@
+#include <iostream>
+using namespace std;
+
+template <typename T>
+struct Node
+{
+	T data;
+	Node<T>* next;
+}; 
+Node<int>* getLastElement(Node<int>* start)
+{
+	Node<int>* result = start;
+	while (result->next != nullptr)
+	{
+		result = result->next;
+	}
+	//cout << result->data << " ";
+	return result;
+}
+Node<int>* flatten(Node<Node<int>*>* start)
+{
+	if (start == nullptr) return nullptr;
+	if (start->data == nullptr) return flatten(start->next);
+	Node<int>* result = start->data;
+	if (start->next == nullptr) return result;
+	getLastElement(start->data)->next = start->next->data;
+	//cout << "connects to "<< start->next->data->data << endl;
+	flatten(start->next);
+	return result;
+}
+void print(Node<int> * start) 
+{
+	Node<int>* temp = start;
+	while (temp != nullptr)
+	{
+		cout << temp->data << " ";
+		temp = temp->next;
+	}
+	cout << endl;
+}
+int main()
+{
+
+	Node<int> n1_3 = { 3, nullptr };
+	Node<int> n1_2 = { 2, &n1_3 };
+	Node<int> n1_1 = { 1, &n1_2 };
+
+	Node<int> n2_2 = { 5, nullptr };
+	Node<int> n2_1 = { 4, &n2_2 };
+
+	Node<int> n3_1 = { 6, nullptr };
+
+	Node<Node<int>*> n3 = { &n3_1, nullptr };
+	Node<Node<int>*> n2 = { &n2_1, &n3 };
+	Node<Node<int>*> n1 = { &n1_1, &n2 };
+
+	Node<int> * result = flatten(&n1);
+	print(result);
+	system("pause");
+	return 0;
+}
