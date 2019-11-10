@@ -1,0 +1,65 @@
+#include <iostream>
+using namespace std;
+
+template <typename T>
+struct Node
+{
+	T data;
+	Node* next;
+	Node(){}
+};
+
+void print(Node<int>* flattened)
+{
+	Node<int>* temp = flattened;
+	while (temp->next != nullptr)
+	{
+		cout << temp->data << " ";
+		temp = temp->next;
+	}
+	cout << temp->data;
+	cout << endl;
+}
+
+Node<int>* getLastElement(Node<int>* first)
+{
+	while (first->next != nullptr) first = first->next;
+	return first;
+}
+
+Node<int>* flatten(Node<Node<int>*>* list)
+{
+	Node<int>* start = list->data;
+	Node<int>* result = list->data;
+	if (list->next == nullptr) return result; 
+	if (list->next->data == nullptr) return result;
+	Node<Node<int>*>* temp = list->next->next;
+	getLastElement(start)->next = list->next->data;
+	list->next = temp;
+	flatten(list);
+}
+
+int main()
+{
+	Node<Node<int>*>* list1 = new Node<Node<int>*>();
+	list1->data = new Node<int>();
+	list1->data->data = 1;
+	list1->data->next = new Node<int>();
+	list1->data->next->data = 2;
+	Node<Node<int>*>* list2=new Node<Node<int>*>();
+	list1->next = list2;
+	list2->data = new Node<int>();
+	list2->data->data = 3;
+	list2->data->next = new Node<int>();
+	list2->data->next->data = 4;
+
+	list1->data->next->next = nullptr;
+	list2->data->next->next = nullptr;
+	list2->next = nullptr;
+	
+	Node<int>* flattened = flatten(list1);
+	print(flattened);
+
+	system("pause");
+	return 0;
+}
