@@ -1,0 +1,73 @@
+#include <iostream>
+#include <list>
+#include <stack>
+using namespace std;
+
+list<int> flatten(list<stack<int> > l)
+{
+	list<int> result;
+	int counter = 0;
+	for (list<stack<int> >::iterator it = l.begin(); it != l.end(); it++)
+	{
+		counter++;
+		stack<int> curr = *it;
+		if (counter % 2 == 0) {
+			while (!curr.empty())
+			{
+				result.push_back(curr.top());
+				curr.pop();
+			}
+		}
+		else
+		{
+			stack<int> temp;
+			while (!curr.empty())
+			{
+				temp.push(curr.top());
+				curr.pop();
+			}
+			while (!temp.empty())
+			{
+				result.push_back(temp.top());
+				temp.pop();
+			}
+		}
+	}
+	return result;
+}
+void print(list<int> l) {
+	for (list<int>::iterator it = l.begin(); it != l.end(); it++) {
+		cout << (*it) << " ";
+	}
+	cout << endl;
+}
+void test_flatten_stack() {
+	stack<int> s1;
+	s1.push(30);
+	s1.push(20);
+	s1.push(10);
+
+	stack<int> s2;
+	s2.push(200);
+	s2.push(100);
+
+	stack<int> s3;
+	s3.push(40);
+	s3.push(30);
+	s3.push(20);
+	s3.push(10);
+
+	list<stack<int> > stacks;
+	stacks.push_back(s1);
+	stacks.push_back(s2);
+	stacks.push_back(s3);
+
+	print(flatten(stacks));
+}
+
+int main()
+{
+	test_flatten_stack();
+	system("pause");
+	return 0;
+}
