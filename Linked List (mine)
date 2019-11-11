@@ -1,0 +1,137 @@
+#include <iostream>
+using namespace std;
+
+template <typename T>
+struct Node
+{
+	T data;
+	Node<T>* next;
+};
+
+template <typename T>
+class LinkedList
+{
+public:
+	Node<T>* front;
+	Node<T>* back;
+
+public:
+	LinkedList();
+	LinkedList(LinkedList const& other);
+	~LinkedList();
+
+	bool insertAfter(int pos, T data);
+	bool deleteAfter(int pos);
+};
+
+template<typename T>
+LinkedList<T>::LinkedList() :front(nullptr), back(nullptr){}
+
+template<typename T>
+LinkedList<T>::LinkedList(LinkedList const & other)
+{
+	if (other.front == nullptr) front = nullptr;
+	else
+	{
+		front = new Node<T>();
+		front->data = other.front->data;
+		Node<T>* curr1 = front;
+		Node<T>* curr2 = other.front->next;
+
+		while (curr2 != nullptr)
+		{
+			Node<T>* temp = new Node<T>();
+			temp->data = curr2->data;
+			curr1->next = temp;
+			curr1 = curr1->next;
+			curr2 = curr2->next;
+		}
+	}
+}
+
+template<typename T>
+LinkedList<T>::~LinkedList()
+{
+	Node<T>* current = front;
+	while (current != nullptr)
+	{
+		Node<T>* toDelete = current;
+		current = current->next;
+		delete  toDelete;
+	}
+}
+
+template<typename T>
+bool LinkedList<T>::insertAfter(int pos, T data)
+{
+	if (front == nullptr && pos != 0) {
+		return false;
+	} 
+	if (front == nullptr && pos == 0) {
+		front = new Node<T>();
+		front->data = data;
+		back = front;
+		return true;
+	}
+	Node<T>* curr = front;
+	for (int i = 0; i < pos && curr->next != nullptr; i++)
+	{
+		curr = curr->next;
+	}
+
+	if (curr != back) {
+
+		Node<T>* neww = new Node<T>();
+		neww->data = data;
+		neww->next = curr->next;
+		curr->next = neww;
+		return true;
+	}
+	if (curr == back)
+	{
+		Node<T>* neww = new Node<T>();
+		neww->data = data;
+		back->next = neww;
+		back = neww;
+		return true;
+	}
+}
+
+template<typename T>
+bool LinkedList<T>::deleteAfter(int pos)
+{
+	Node<T>* curr = front;
+	for (int i = 0; i < pos && curr->next != nullptr; i++)
+	{
+		curr = curr->next;
+	}
+	Node<T>* toDelete = curr->next;
+	if (curr == back) { return false; }
+	if (curr != back)
+	{
+		curr->next = toDelete->next;
+		delete toDelete;
+		return true;
+	}
+}
+
+int main()
+{
+	LinkedList<int> a;
+	a.insertAfter(0, 0);
+	a.insertAfter(1, 1);
+	a.insertAfter(2, 2);
+	a.insertAfter(3, 3);
+	a.insertAfter(0, 100);
+	a.deleteAfter(1);
+	LinkedList<int> b = a;
+	while (b.front->next != nullptr)
+	{
+		cout << b.front->data << " ";
+		b.front = b.front->next;
+	}
+	cout << b.front->data;
+	cout << endl;
+	system("pause");
+	return 0;
+}
