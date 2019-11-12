@@ -1,5 +1,6 @@
 #include <iostream>
 using namespace std;
+#include <list>
 
 template <typename T>
 struct Node
@@ -7,6 +8,72 @@ struct Node
 	T data;
 	Node<T>* next;
 };
+template <typename T>
+class LinkedList;
+
+template <typename T>
+class Iterator
+{
+	friend class LinkedList<T> ;
+	Node<T>* ptr;
+
+public:
+	Iterator<T>(Node<T>* p) : ptr(p) {}
+	Iterator<T> next() const;
+	bool operator==(Iterator<T> other) const;
+	bool operator!=(Iterator<T> other) const;
+	Iterator<T> operator++(int);
+	Iterator<T> operator++();
+	Iterator<T> operator+=(unsigned n);
+	T& getData() const { return ptr->data; }
+	T& operator*() const { return getData(); }
+	T const& getConstData() const { return ptr->data; }
+};
+template<typename T>
+Iterator<T> Iterator<T>::next() const
+{
+	if (ptr == nullptr) return *this;
+	Iterator<T> result = Iterator<T>(ptr->next);
+	return result;
+}
+
+template<typename T>
+bool Iterator<T>::operator==(Iterator<T> other) const
+{
+	return ptr == other.ptr;
+}
+template<typename T>
+bool Iterator<T>::operator!=(Iterator<T> other) const
+{
+	return !(*this == other);
+}
+
+template<typename T>
+Iterator<T> Iterator<T>::operator++(int)
+{
+	//it++
+	Iterator<T> result = *this;
+	*this = next();
+	return result;
+}
+
+template<typename T>
+Iterator<T> Iterator<T>::operator++()
+{
+	//++it
+	return (*this = next());
+}
+
+template<typename T>
+Iterator<T> Iterator<T>::operator+=(unsigned n)
+{
+	for (int i = 0; i < n; i++)
+	{
+		++(*this);
+	}
+	return *this;
+}
+
 
 template <typename T>
 class LinkedList
@@ -22,6 +89,11 @@ public:
 
 	bool insertAfter(int pos, T data);
 	bool deleteAfter(int pos);
+	bool pushBack(T data);
+	bool pushFront(T data);
+	bool deleteBack();
+	bool swap(int pos1, int pos2);
+	//delete-if, reverse, swap, flatten
 };
 
 template<typename T>
@@ -64,21 +136,14 @@ LinkedList<T>::~LinkedList()
 template<typename T>
 bool LinkedList<T>::insertAfter(int pos, T data)
 {
-	if (front == nullptr && pos != 0) {
+	if (front == nullptr) {
 		return false;
-	} 
-	if (front == nullptr && pos == 0) {
-		front = new Node<T>();
-		front->data = data;
-		back = front;
-		return true;
 	}
 	Node<T>* curr = front;
 	for (int i = 0; i < pos && curr->next != nullptr; i++)
 	{
 		curr = curr->next;
 	}
-
 	if (curr != back) {
 
 		Node<T>* neww = new Node<T>();
@@ -115,15 +180,149 @@ bool LinkedList<T>::deleteAfter(int pos)
 	}
 }
 
+template<typename T>
+bool LinkedList<T>::pushBack(T data)
+{
+	if (front == nullptr) 
+	{ 
+		front = new Node<T>();
+		front->data = data;
+		back = front;
+		return true;
+	}
+	int i;
+	Node<T>* curr = front;
+	for (i = 0; curr->next != nullptr; i++)
+	{
+		curr = curr->next;
+	}
+	return insertAfter(i, data);
+}
+
+template<typename T>
+bool LinkedList<T>::pushFront(T data)
+{
+	if (front == nullptr)
+	{
+		front = new Node<T>();
+		front->data = data;
+		return true;
+	}
+	Node<T>* newNode = new Node<T>();
+	newNode->data = data;
+	newNode->next = front;
+	front = newNode;
+	return true;
+}
+
+template<typename T>
+bool LinkedList<T>::deleteBack()
+{
+	if (back == nullptr) return false;
+	Node<T>* toDelete = back;
+	Node<T>* curr = front;
+	while (curr->next != back)
+	{
+		curr = curr->next;
+	}
+	curr->next = nullptr;
+	back = curr;
+	delete toDelete;
+	return true;
+}
+
+template<typename T>
+bool LinkedList<T>::swap(int pos1, int pos2)
+{
+	if (pos1 > pos2)
+	{
+		int temp;
+		temp = pos1;
+		pos1 = pos2;
+		pos2 = temp;
+	}
+	if (pos1 == pos2) return true;
+	if (pos1 == 0)
+	{
+		Node<T>* prev2 = front;
+		for (int i = 0; i < pos2 - 1; i++)
+		{
+			prev2 = prev2->next;
+		}
+		Node<T>* A = front;
+		Node<T>* B = prev2->next;
+
+		if (abs(pos2 - pos1) == 1)
+		{
+			A->next = B->next;
+			B->next = A;
+			front = B;
+			return true;
+		}
+		else
+		{
+			Node<T>* temp = new Node<T>();
+			prev2->next = A;
+			temp->next = A->next;
+			A->next = B->next;
+			B->next = temp->next;
+			front = B;
+			return true;
+		}
+	}
+
+	Node<T>* prev1 = front;
+	Node<T>* prev2 = front;
+	for (int i = 0; i < pos1 - 1; i++)
+	{
+		prev1 = prev1->next;
+	}
+	for (int i = 0; i < pos2 - 1; i++)
+	{
+		prev2 = prev2->next;
+	}
+	Node<T>* A = prev1->next;
+	Node<T>* B = prev2->next;
+	Node<T>* temp = new Node<T>();
+
+	if (abs(pos1 - pos2) == 1 && pos1!=0)
+	{
+		prev1->next = B;
+		temp->next = B->next;
+		B->next = A;
+		A->next = temp->next;
+		return true;
+	}
+	if (pos1 != 0)
+	{
+		temp->next = A->next;
+		prev2->next = A;
+		prev1->next = B;
+		A->next = B->next;
+		B->next = temp->next;
+		delete temp;
+		return true;
+	}
+}
+
 int main()
 {
 	LinkedList<int> a;
-	a.insertAfter(0, 0);
-	a.insertAfter(1, 1);
-	a.insertAfter(2, 2);
-	a.insertAfter(3, 3);
+	//a.insertAfter(0, 0); //returns false, front is nullptr
+	a.pushBack(0);
+	a.pushBack(1);
+	//a.insertAfter(1, 1);
+	a.pushBack(2);
+	a.pushBack(3);
+	a.pushBack(4);
+	/*a.insertAfter(3, 3);
 	a.insertAfter(0, 100);
-	a.deleteAfter(1);
+	a.deleteAfter(1);*/
+	a.pushBack(321);
+	a.pushBack(322);
+	a.pushBack(323);
+	a.swap(0, 3);
+	//a.pushFront(789);
 	LinkedList<int> b = a;
 	while (b.front->next != nullptr)
 	{
